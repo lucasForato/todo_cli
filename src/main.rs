@@ -1,28 +1,31 @@
 use clap::Parser;
 
-mod commands;
-use commands::{Cli, Commands};
+mod utils;
+use utils::render_text;
+use utils::RendererProps;
 
+mod commands;
 use commands::init;
 use commands::list;
+use commands::{Cli, Commands};
 
 fn main() {
     let args = Cli::parse();
 
     match args.cmd {
-        Commands::Init => {
-            let result = init::execute();
-            match result {
-                Ok(_) => println!("Initialization successful!"),
-                Err(err) => eprintln!("Error during initialization:: {}", err),
+        Commands::Init => match init::execute() {
+            Ok(_) => (),
+            Err(err) => {
+                let err_message = format!("Error during initialization:: {}", err);
+                render_text(&err_message, RendererProps::error());
             }
-        }
-        Commands::List(args) => {
-            let result = list::execute(args);
-            match result {
-                Ok(_) => (),
-                Err(err) => eprintln!("Error during list command:: {}", err),
+        },
+        Commands::List(args) => match list::execute(args) {
+            Ok(_) => (),
+            Err(err) => {
+                let err_message = format!("Error during listing:: {}", err);
+                render_text(&err_message, RendererProps::error())
             }
-        }
+        },
     }
 }
